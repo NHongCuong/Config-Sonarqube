@@ -1,3 +1,4 @@
+```bash
 -----------SonarqubeUpdate_Final------------
 
 
@@ -7,6 +8,8 @@ sudo mkdir -p /mnt/sonarqube
 sudo chown -R 1000:1000 /mnt/sonarqube
 sudo chmod -R 775 /mnt/sonarqube
 
+```
+```bash
 ----Setup database-----
 
 sudo apt update && sudo apt upgrade -y
@@ -78,17 +81,53 @@ GRANT ALL PRIVILEGES ON DATABASE sonarqube TO sonar;
 \c sonarqube
 GRANT ALL ON SCHEMA public TO sonar;
 
-
+```
+```bash
 sudo nano /etc/sysctl.conf
 Thêm các dòng sau vào cuối file:
 vm.max_map_count=262144
 fs.file-max=65536
 
 sudo sysctl -p
-
+```
+```bash
 Run file volume.yaml, service.yaml, configupdate.yaml
    cd SonarqubeUpdate_Final
    kubectl apply -f volume.yaml
    kubectl apply -f service.yaml
    kubectl apply -f configupdate.yaml
   
+```
+```bash
+Theo dõi tiến trình khởi động
+kubectl get pods -n sonarqube -w
+kubectl logs sonarqube-general-0 -n sonarqube -f
+
+Xem Log để xác nhận "Operational"
+kubectl logs sonarqube-general-0 -n sonarqube -f
+
+kubectl logs sonarqube-general-0 -n sonarqube | grep "is operational"
+kubectl logs -f statefulset/sonarqube-general -n sonarqube
+kubectl describe pod sonarqube-general-0 -n sonarqube
+kubectl get svc -n sonarqube
+kubectl get pvc -n sonarqube
+sudo kubectl get all -n sonarqube
+sudo kubectl get pvc -n sonarqube
+
+Khi trạng thái chuyển sang Running, bạn có thể kiểm tra xem nó có nằm đúng Node không:
+kubectl get pod -n sonarqube -o wide
+
+kubectl delete pod sonarqube-general-0 -n sonarqube
+kubectl delete svc sonarqube -n sonarqube
+
+
+kubectl delete pvc data-sonarqube -n sonarqube --ignore-not-found
+kubectl delete pv sonar-pv --ignore-not-found
+sudo kubectl delete -f volume.yaml
+sudo rm -rf /mnt/sonarqube/*
+sudo kubectl delete deployment sonarqube-general -n sonarqube
+
+Kiểm tra init-sysctl (Cài đặt cấu hình hệ thống)
+kubectl logs sonarqube-general-0 -n sonarqube -c init-sysctl
+kubectl logs sonarqube-general-0 -n sonarqube -c init-fs
+```
