@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: sonarqube-service
+  namespace: sonarqube
+spec:
+  type: NodePort
+  selector:
+    # QUAN TRỌNG: Label này phải khớp với label của Pod SonarQube
+    app.kubernetes.io/instance: sonarqube
+    app.kubernetes.io/name: general
+  ports:
+    - protocol: TCP
+      port: 9000      # Cổng của Service
+      targetPort: 9000 # Cổng bên trong Container
+      nodePort: 31000

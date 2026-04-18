@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sonarqube-general
+  namespace: sonarqube
+  labels:
+    app.kubernetes.io/instance: sonarqube
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: general
+    app.kubernetes.io/version: 1.16.0
+    helm.sh/chart: general-0.1.0
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: sonarqube
+      app.kubernetes.io/name: general
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: sonarqube
+        app.kubernetes.io/name: general
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: hongcuong
+      SecurityContext:
+        fsGroup: 1000
+      containers:
+        - name: general
+          image: sonarqube:9.9.2-community
+                  
+            
+        
+        

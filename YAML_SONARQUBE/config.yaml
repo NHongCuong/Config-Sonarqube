@@ -1,0 +1,44 @@
+# 1. Cấu hình định danh (Tương ứng metadata trong ảnh)
+edition: ""
+community:
+  enabled: true
+
+monitoringPasscode: "Cuong.2026"
+
+nameOverride: "general"
+fullnameOverride: "sonarqube-general"
+
+# 2. Cấu hình Image (Dòng image trong ảnh)
+image:
+  repository: sonarqube
+  tag: 9.9.2-community
+  pullPolicy: IfNotPresent
+
+# 3. Cấu hình Điều phối Pod (Dòng nodeSelector trong ảnh)
+nodeSelector:
+  kubernetes.io/hostname: hongcuong
+
+# 4. Cấu hình Bảo mật (Dòng SecurityContext trong ảnh)
+podSecurityContext:
+  fsGroup: 1000
+
+# 5. Chiến lược cập nhật (Dòng strategy trong ảnh)
+updateStrategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxSurge: 25%
+    maxUnavailable: 25%
+
+# 6. Số lượng bản sao (Dòng replicas trong ảnh)
+replicaCount: 1
+
+# 7. Labels bổ sung (Dòng labels trong ảnh)
+podLabels:
+  app.kubernetes.io/instance: sonarqube
+  app.kubernetes.io/name: general
+  app.kubernetes.io/version: 1.16.0
+  helm.sh/chart: general-0.1.0
+
+# 8. Cấu hình Lưu trữ (Persistence)
+persistence:
+  enabled: true

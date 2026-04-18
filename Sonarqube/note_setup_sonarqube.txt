@@ -1,0 +1,135 @@
+sudo mkdir -p /mnt/sonarqube
+sudo chown -R 1000:1000 /mnt/sonarqube
+kubectl create namespace sonarqube
+
+helm repo add sonarqube https://SonarSource.github.io/helm-chart-sonarqube
+helm repo update
+helm install sonarqube sonarqube/sonarqube -n sonarqube -f config.yaml
+
+curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+# Kiểm tra phiên bản
+
+curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+chmod 700 get_helm.sh
+./get_helm.sh
+
+
+https://github.com/SonarSource/helm-chart-sonarqube/blob/master/charts/sonarqube/README.md
+helm repo add sonarqube https://SonarSource.github.io/helm-chart-sonarqube
+helm repo update
+kubectl create namespace sonarqube
+export MONITORING_PASSCODE="nhannguyen"
+helm upgrade --install -n sonarqube sonarqube sonarqube/sonarqube --set edition=developer,monitoringPasscode=$MONITORING_PASSCODE
+
+
+helm version
+
+
+
+kubectl apply -f volume.yaml
+
+# 1. Tạo thư mục
+sudo mkdir -p /mnt/sonarqube
+
+# 2. Cấp quyền cho user SonarQube (UID 1000)
+sudo chown -R 1000:1000 /mnt/sonarqube
+
+# 3. Cấp quyền đọc ghi
+sudo chmod -R 775 /mnt/sonarqube
+
+kubectl apply -f volume.yaml
+
+sudo helm install sonarqube sonarqube/sonarqube --namespace sonarqube -f config.yaml
+sudo helm upgrade --install sonarqube sonarqube/sonarqube --namespace sonarqube -f config.yaml
+helm upgrade sonarqube sonarqube/sonarqube -n sonarqube -f config.yaml
+
+File config.yaml hoàn chỉnh (Đã sửa lỗi Edition)
+sudo helm upgrade --install sonarqube sonarqube/sonarqube \
+  --namespace sonarqube \
+  -f config.yaml
+
+Tăng thời gian Timeout cho Helm
+sudo helm install sonarqube sonarqube/sonarqube \
+  --namespace sonarqube \
+  -f config.yaml \
+  --kube-api-burst 10 \
+  --kube-api-qps 5
+
+helm list -A
+sudo kubectl get statefulset sonarqube-general -n sonarqube -o yaml
+
+root@hongcuong:~/Sonarqube# helm install sonarqube sonarqube/sonarqube --namespace sonarqube -f config.yaml
+Error: INSTALLATION FAILED: cannot re-use a name that is still in use
+=>Gỡ cài đặt bản cũ (Clean up)
+sudo helm uninstall sonarqube --namespace sonarqube
+
+
+sudo systemctl restart kubelet
+sudo systemctl restart docker  # hoặc containerd tùy môi trường của bạn
+
+Node Master bị "Taint"
+kubectl taint nodes --all node-role.kubernetes.io/control-plane-
+# Hoặc nếu bản cũ:
+kubectl taint nodes --all node-role.kubernetes.io/master-
+
+------------Fix tài nguyên---------------
+sudo sysctl -w vm.max_map_count=262144
+kubectl patch statefulset sonarqube-general -n sonarqube --type='json' -p='[{"op": "replace", "path": "/spec/template/spec/containers/0/resources/requests/memory", "value":"1024Mi"},{"op": "replace", "path": "/spec/template/spec/containers/0/resources/limits/memory", "value":"2048Mi"}]'
+kubectl patch statefulset sonarqube-general -n sonarqube --type='json' -p='[{"op": "replace", "path": "/spec/template/spec/containers/0/resources/limits/memory", "value":"3072Mi"}]'
+kubectl patch statefulset sonarqube-general -n sonarqube --type='json' -p='[{"op": "replace", "path": "/spec/template/spec/containers/0/resources/requests/cpu", "value":"100m"},{"op": "replace", "path": "/spec/template/spec/containers/0/resources/limits/cpu", "value":"500m"}]'
+#Tăng thêm thời gian chờ cho Startup Probe để Kubernetes "kiên nhẫn" hơn:
+kubectl patch statefulset sonarqube-general -n sonarqube --type='json' -p='[{"op": "replace", "path": "/spec/template/spec/containers/0/startupProbe/failureThreshold", "value": 120}]'
+kubectl patch statefulset sonarqube-general -n sonarqube --type='json' -p='[{"op": "replace", "path": "/spec/template/spec/containers/0/startupProbe/failureThreshold", "value": 90}]'
+
+
+kubectl patch statefulset sonarqube-general -n sonarqube --type='json' -p='[{"op": "replace", "path": "/spec/template/spec/containers/0/livenessProbe/initialDelaySeconds", "value": 300}]'
+
+
+
+sudo kubectl edit svc sonarqube-general -n sonarqube
+
+Để chuyển sang NodePort (Cổng ngẫu nhiên):
+sudo kubectl patch svc sonarqube-general -n sonarqube -p '{"spec": {"type": "NodePort"}}'
+
+Để chuyển sang NodePort và đặt luôn cổng cố định (ví dụ 30005):
+sudo kubectl patch svc sonarqube-general -n sonarqube -p '{"spec": {"ports": [{"port": 9000, "nodePort": 30005}], "type": "NodePort"}}'
+
+helm upgrade sonarqube sonarqube/sonarqube -n sonarqube -f config.yaml
+
+
+
+
+
+
+
+Theo dõi tiến trình khởi động
+kubectl get pods -n sonarqube -w
+kubectl logs sonarqube-general-0 -n sonarqube -f
+
+Xem Log để xác nhận "Operational"
+kubectl logs sonarqube-general-0 -n sonarqube -f
+
+kubectl logs sonarqube-general-0 -n sonarqube | grep "is operational"
+kubectl logs -f statefulset/sonarqube-general -n sonarqube
+kubectl describe pod sonarqube-general-0 -n sonarqube
+kubectl get svc -n sonarqube
+kubectl get pvc -n sonarqube
+sudo kubectl get all -n sonarqube
+sudo kubectl get pvc -n sonarqube
+
+Khi trạng thái chuyển sang Running, bạn có thể kiểm tra xem nó có nằm đúng Node không:
+kubectl get pod -n sonarqube -o wide
+
+kubectl delete pod sonarqube-general-0 -n sonarqube
+kubectl delete svc sonarqube-sonarqube -n sonarqube
+
+
+kubectl delete pvc data-sonarqube -n sonarqube --ignore-not-found
+kubectl delete pv sonar-pv --ignore-not-found
+sudo kubectl delete -f volume.yaml
+sudo rm -rf /mnt/sonarqube/*
+sudo kubectl delete deployment sonarqube-general -n sonarqube
+
+Kiểm tra init-sysctl (Cài đặt cấu hình hệ thống)
+kubectl logs sonarqube-general-0 -n sonarqube -c init-sysctl
+kubectl logs sonarqube-general-0 -n sonarqube -c init-fs

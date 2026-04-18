@@ -1,0 +1,55 @@
+# 1. StorageClass cho Local Storage
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: local-storage
+  labels:
+    app.kubernetes.io/part-of: sonarqube-system
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: WaitForFirstConsumer
+
+---
+# 2. Persistent Volume (Chỉ định rõ node hongcuong)
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: sonar-pv
+  labels:
+    type: local
+    app.kubernetes.io/name: sonarqube
+    app.kubernetes.io/part-of: sonarqube-system
+spec:
+  storageClassName: local-storage
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  local:
+    path: /mnt/sonarqube # Đảm bảo thư mục này đã tồn tại trên node hongcuong
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - smashshop
+
+---
+# 3. Persistent Volume Claim (Để Deployment gọi đến)
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: sonar-pvc
+  namespace: sonarqube
+  labels:
+    app.kubernetes.io/name: sonarqube
+    app.kubernetes.io/instance: sonarqube
+spec:
+  storageClassName: local-storage
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
