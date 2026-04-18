@@ -99,6 +99,10 @@ Run file volume.yaml, service.yaml, configupdate.yaml
   
 ```
 ```bash
+--------Login-----
+http://IP_Address:31000
+```
+```bash
 Theo dõi tiến trình khởi động
 kubectl get pods -n sonarqube -w
 kubectl logs sonarqube-general-0 -n sonarqube -f
